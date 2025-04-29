@@ -1,386 +1,536 @@
 import React, { useState, useEffect } from 'react';
+import './App.css';
 
 const App = () => {
-  // Sample product data
-  const allProducts = [
-    {
-      id: 1,
-      name: 'Smartphone X Pro',
-      price: 567.99,
-      category: 'Phones',
-      brand: 'TechMaster',
-      rating: 4.5,
-      image: 'https://via.placeholder.com/200x200?text=Smartphone+X+Pro',
-      description: 'Flagship smartphone with advanced camera system and long battery life.',
-      inStock: true
-    },
-    {
-      id: 2,
-      name: 'Ultra HD Smart TV',
-      price: 1299.99,
-      category: 'Televisions',
-      brand: 'VisionPlus',
-      rating: 4.7,
-      image: 'https://via.placeholder.com/200x200?text=Ultra+HD+Smart+TV',
-      description: '65-inch 4K Ultra HD Smart TV with HDR and voice control.',
-      inStock: true
-    },
-    {
-      id: 3,
-      name: 'Wireless Noise-Canceling Headphones',
-      price: 349.99,
-      category: 'Audio',
-      brand: 'SoundMax',
-      rating: 4.3,
-      image: 'https://via.placeholder.com/200x200?text=Wireless+Headphones',
-      description: 'Premium over-ear headphones with active noise cancellation.',
-      inStock: false
-    },
-    {
-      id: 4,
-      name: 'Gaming Laptop Elite',
-      price: 1599.99,
-      category: 'Laptops',
-      brand: 'GameTech',
-      rating: 4.8,
-      image: 'https://via.placeholder.com/200x200?text=Gaming+Laptop+Elite',
-      description: 'High-performance gaming laptop with RTX graphics and 144Hz display.',
-      inStock: true
-    },
-    {
-      id: 5,
-      name: 'Smart Watch Series 5',
-      price: 249.99,
-      category: 'Wearables',
-      brand: 'TechMaster',
-      rating: 4.2,
-      image: 'https://via.placeholder.com/200x200?text=Smart+Watch+Series+5',
-      description: 'Fitness tracking and smartphone notifications on your wrist.',
-      inStock: true
-    },
-    {
-      id: 6,
-      name: 'Bluetooth Speaker Pro',
-      price: 129.99,
-      category: 'Audio',
-      brand: 'SoundMax',
-      rating: 4.0,
-      image: 'https://via.placeholder.com/200x200?text=Bluetooth+Speaker+Pro',
-      description: 'Portable speaker with 20-hour battery life and waterproof design.',
-      inStock: true
-    },
-    {
-      id: 7,
-      name: 'Tablet Plus',
-      price: 499.99,
-      category: 'Tablets',
-      brand: 'TechMaster',
-      rating: 4.1,
-      image: 'https://via.placeholder.com/200x200?text=Tablet+Plus',
-      description: '10.5-inch tablet with stylus support and all-day battery.',
-      inStock: false
-    },
-    {
-      id: 8,
-      name: 'DSLR Camera Pro',
-      price: 899.99,
-      category: 'Cameras',
-      brand: 'PhotoMaster',
-      rating: 4.6,
-      image: 'https://via.placeholder.com/200x200?text=DSLR+Camera+Pro',
-      description: '24.2MP DSLR camera with 4K video and interchangeable lenses.',
-      inStock: true
-    }
-  ];
-
-  // State management
-  const [products, setProducts] = useState(allProducts);
+  // State for products
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // State for search and filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedBrand, setSelectedBrand] = useState('All');
-  const [priceRange, setPriceRange] = useState(2000);
-  const [inStockOnly, setInStockOnly] = useState(false);
+  const [priceFilter, setPriceFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  
+  // State for registration form
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    location: '',
+    gender: '',
+    country: '',
+    password: '',
+    confirmPassword: ''
+  });
+  
+  // State for active tab
+  const [activeTab, setActiveTab] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [sortOption, setSortOption] = useState('featured');
-  const [isLoading, setIsLoading] = useState(true);
+  const [cart, setCart] = useState([]);
+  
+  // Categories for products
+  const categories = ['Smartphones', 'Laptops', 'Tablets', 'Accessories', 'Cameras', 'TVs'];
 
-  // Simulate loading
+  // Fetch products (simulated with useEffect)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
+    // Simulate API call
+    setTimeout(() => {
+      const mockProducts = [
+        { id: 1, name: 'iPhone 13 Pro', price: 234500, category: 'Smartphones', description: 'Latest iPhone with A15 Bionic chip', image: 'https://via.placeholder.com/400x300?text=iPhone+13+Pro' },
+        { id: 2, name: 'MacBook Pro 14"', price: 959700, category: 'Laptops', description: 'Powerful laptop with M1 Pro chip', image: 'https://via.placeholder.com/400x300?text=MacBook+Pro+14' },
+        { id: 3, name: 'iPad Air', price: 54000, category: 'Tablets', description: 'Thin and light tablet with M1 chip', image: 'https://via.placeholder.com/400x300?text=iPad+Air' },
+        { id: 4, name: 'AirPods Pro', price: 23000, category: 'Accessories', description: 'Noise cancelling wireless earbuds', image: 'https://via.placeholder.com/400x300?text=AirPods+Pro' },
+        { id: 5, name: 'Sony A7 IV', price: 1400000, category: 'Cameras', description: 'Full-frame mirrorless camera', image: 'https://via.placeholder.com/400x300?text=Sony+A7+IV' },
+        { id: 6, name: 'Samsung QLED 65"', price: 357000, category: 'TVs', description: '4K Smart TV with Quantum Dot technology', image: 'https://via.placeholder.com/400x300?text=Samsung+QLED' },
+        { id: 7, name: 'Galaxy S22 Ultra', price: 785800, category: 'Smartphones', description: 'Samsung flagship with S Pen', image: 'https://via.placeholder.com/400x300?text=Galaxy+S22+Ultra' },
+        { id: 8, name: 'Dell XPS 15', price: 654000, category: 'Laptops', description: 'Premium Windows laptop', image: 'https://via.placeholder.com/400x300?text=Dell+XPS+15' },
+      ];
+      setProducts(mockProducts);
+      setFilteredProducts(mockProducts);
+      setLoading(false);
     }, 1000);
-    return () => clearTimeout(timer);
   }, []);
 
-  // Filter and sort products
+  // Filter products based on search and filters
   useEffect(() => {
-    let filteredProducts = [...allProducts];
-
-    // Apply search filter
+    let result = products;
+    
     if (searchTerm) {
-      filteredProducts = filteredProducts.filter(product =>
+      result = result.filter(product => 
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
-    // Apply category filter
-    if (selectedCategory !== 'All') {
-      filteredProducts = filteredProducts.filter(
-        product => product.category === selectedCategory
-      );
+    
+    if (categoryFilter) {
+      result = result.filter(product => product.category === categoryFilter);
     }
-
-    // Apply brand filter
-    if (selectedBrand !== 'All') {
-      filteredProducts = filteredProducts.filter(
-        product => product.brand === selectedBrand
-      );
+    
+    if (priceFilter) {
+      const [min, max] = priceFilter.split('-').map(Number);
+      result = result.filter(product => product.price >= min && product.price <= max);
     }
+    
+    setFilteredProducts(result);
+  }, [searchTerm, categoryFilter, priceFilter, products]);
 
-    // Apply price filter
-    filteredProducts = filteredProducts.filter(
-      product => product.price <= priceRange
-    );
-
-    // Apply in stock filter
-    if (inStockOnly) {
-      filteredProducts = filteredProducts.filter(
-        product => product.inStock
-      );
-    }
-
-    // Apply sorting
-    switch (sortOption) {
-      case 'price-low':
-        filteredProducts.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filteredProducts.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        filteredProducts.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        // Featured (default) sorting - could be based on some business logic
-        break;
-    }
-
-    setProducts(filteredProducts);
-  }, [searchTerm, selectedCategory, selectedBrand, priceRange, inStockOnly, sortOption]);
-
-  // Get unique categories and brands for filters
-  const categories = ['All', ...new Set(allProducts.map(product => product.category))];
-  const brands = ['All', ...new Set(allProducts.map(product => product.brand))];
-
-  // Handle product selection
-  const handleProductClick = (product) => {
-    setSelectedProduct(product);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  // Handle close product details
-  const handleCloseDetails = () => {
-    setSelectedProduct(null);
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Registration successful!\nWelcome ${formData.fullName}`);
+    setIsRegistering(false);
+    setFormData({
+      fullName: '',
+      email: '',
+      location: '',
+      gender: '',
+      country: '',
+      password: '',
+      confirmPassword: ''
+    });
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setSearchTerm('');
+    setCategoryFilter('');
+    setPriceFilter('');
+  };
+
+  // Add to cart function
+  const addToCart = (product) => {
+    setCart([...cart, product]);
+    alert(`${product.name} added to cart!`);
+  };
+
+  // Format price with commas
+  const formatPrice = (price) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   return (
     <div className="app">
-      {/* Header */}
-      <header className="header"  >
-        <h1>TRAP ONLINE SHOP</h1>
-        <p>available for sell and delivery your wish</p>
-      </header>
+      {/* Navigation Bar */}
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <span className="logo-highlight">23</span> ONLINE SHOP
+        </div>
+        <ul className="nav-links">
+          <li className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}>Home</li>
+          <li className={activeTab === 'about' ? 'active' : ''} onClick={() => setActiveTab('about')}>About Us</li>
+          <li className={activeTab === 'contact' ? 'active' : ''} onClick={() => setActiveTab('contact')}>Contact Us</li>
+          <li onClick={() => setIsRegistering(true)}>Register</li>
+          <li className="cart-icon" onClick={() => alert(`You have ${cart.length} items in your cart`)}>
+            <i className="fas fa-shopping-cart"></i> ({cart.length})
+          </li>
+        </ul>
+        <div className="search-container">
+          <input 
+            type="text" 
+            placeholder="Search products..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <i className="fas fa-search search-icon"></i>
+        </div>
+      </nav>
 
       {/* Main Content */}
       <main className="main-content">
-        {/* Search and Filters Section */}
-        <div className="filters-section">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-            <button className="search-button">
-              <i className="fas fa-search"></i>
-            </button>
+        {isRegistering ? (
+          <div className="registration-modal">
+            <div className="registration-form">
+              <h2>Create Your Account</h2>
+              <button className="close-btn" onClick={() => setIsRegistering(false)}>×</button>
+              
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input 
+                    type="text" 
+                    name="fullName" 
+                    value={formData.fullName} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Email</label>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    value={formData.email} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Location</label>
+                  <input 
+                    type="text" 
+                    name="location" 
+                    value={formData.location} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select name="gender" value={formData.gender} onChange={handleInputChange} required>
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>Country</label>
+                  <input 
+                    type="text" 
+                    name="country" 
+                    value={formData.country} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Password</label>
+                  <input 
+                    type="password" 
+                    name="password" 
+                    value={formData.password} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Confirm Password</label>
+                  <input 
+                    type="password" 
+                    name="confirmPassword" 
+                    value={formData.confirmPassword} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                </div>
+                
+                <button type="submit" className="submit-btn">Register</button>
+              </form>
+            </div>
           </div>
+        ) : null}
 
-          <div className="filter-controls">
-            <div className="filter-group">
-              <label htmlFor="category">Category:</label>
-              <select
-                id="category"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label htmlFor="brand">Brand:</label>
-              <select
-                id="brand"
-                value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)}
-              >
-                {brands.map(brand => (
-                  <option key={brand} value={brand}>{brand}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label htmlFor="price">Max Price: FRW{priceRange}</label>
-              <input
-                id="price"
-                type="range"
-                min="0"
-                max="1806"
-                step="50"
-                value={priceRange}
-                onChange={(e) => setPriceRange(parseInt(e.target.value))}
-              />
-            </div>
-
-            <div className="filter-group checkbox-group">
-              <input
-                type="checkbox"
-                id="inStock"
-                checked={inStockOnly}
-                onChange={(e) => setInStockOnly(e.target.checked)}
-              />
-              <label htmlFor="inStock">In Stock Only</label>
-            </div>
-
-            <div className="filter-group">
-              <label htmlFor="sort">Sort By:</label>
-              <select
-                id="sort"
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-              >
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Rating</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Product Details View */}
-        {selectedProduct && (
-          <div className="product-details">
-            <button className="close-button" onClick={handleCloseDetails}>
-              &times;
-            </button>
-            <div className="details-content">
-              <div className="details-image">
-                <img src={selectedProduct.image} alt={selectedProduct.name} />
+        {activeTab === 'home' && (
+          <>
+            {selectedProduct ? (
+              <div className="product-detail">
+                <button className="back-btn" onClick={() => setSelectedProduct(null)}>
+                  <i className="fas fa-arrow-left"></i> Back to Products
+                </button>
+                <div className="detail-container">
+                  <div className="detail-image">
+                    <img src={selectedProduct.image} alt={selectedProduct.name} />
+                    <div className="product-badge">Hot Deal</div>
+                  </div>
+                  <div className="detail-info">
+                    <h2>{selectedProduct.name}</h2>
+                    <p className="price">FRW {formatPrice(selectedProduct.price)}</p>
+                    <p className="category">{selectedProduct.category}</p>
+                    <div className="rating">
+                      <i className="fas fa-star"></i>
+                      <i className="fas fa-star"></i>
+                      <i className="fas fa-star"></i>
+                      <i className="fas fa-star"></i>
+                      <i className="fas fa-star-half-alt"></i>
+                      <span>(24 reviews)</span>
+                    </div>
+                    <p className="description">{selectedProduct.description}</p>
+                    <div className="action-buttons">
+                      <button className="add-to-cart" onClick={() => addToCart(selectedProduct)}>
+                        <i className="fas fa-shopping-cart"></i> ADD TO CART
+                      </button>
+                      <button className="buy-now">
+                        <i className="fas fa-bolt"></i> BUY NOW
+                      </button>
+                    </div>
+                    <div className="product-meta">
+                      <div className="meta-item">
+                        <i className="fas fa-shield-alt"></i>
+                        <span>1 Year Warranty</span>
+                      </div>
+                      <div className="meta-item">
+                        <i className="fas fa-truck"></i>
+                        <span>Free Delivery</span>
+                      </div>
+                      <div className="meta-item">
+                        <i className="fas fa-undo"></i>
+                        <span>7-Day Returns</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="details-info">
-                <h2>{selectedProduct.name}</h2>
-                <div className="price-rating">
-                  <span className="price">${selectedProduct.price.toFixed(2)}</span>
-                  <span className="rating">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <i
-                        key={i}
-                        className={`fas fa-star ${i < Math.floor(selectedProduct.rating) ? 'filled' : ''} ${i === Math.floor(selectedProduct.rating) && selectedProduct.rating % 1 >= 0.5 ? 'half-filled' : ''}`}
-                      ></i>
-                    ))}
-                    <span>({selectedProduct.rating})</span>
-                  </span>
+            ) : (
+              <>
+                <div className="hero-banner">
+                  <div className="hero-content">
+                    <h1>Welcome to 23 ONLINE SHOP</h1>
+                    <p>Discover the latest electronics at unbeatable prices</p>
+                    <button className="shop-now-btn">SHOP NOW</button>
+                  </div>
                 </div>
-                <p className="availability">
-                  {selectedProduct.inStock ? (
-                    <span className="in-stock">In Stock</span>
+                
+                <div className="filters-container">
+                  <div className="filters">
+                    <h2><i className="fas fa-filter"></i> Filters</h2>
+                    <div className="filter-group">
+                      <label>Category</label>
+                      <select 
+                        value={categoryFilter} 
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                      >
+                        <option value="">All Categories</option>
+                        {categories.map(category => (
+                          <option key={category} value={category}>{category}</option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div className="filter-group">
+                      <label>Price Range</label>
+                      <select 
+                        value={priceFilter} 
+                        onChange={(e) => setPriceFilter(e.target.value)}
+                      >
+                        <option value="">All Prices</option>
+                        <option value="0-100000">Under FRW 100,000</option>
+                        <option value="100000-500000">FRW 100,000 - 500,000</option>
+                        <option value="500000-1000000">FRW 500,000 - 1,000,000</option>
+                        <option value="1000000-9999000">Over FRW 1,000,000</option>
+                      </select>
+                    </div>
+                    
+                    <button className="reset-btn" onClick={resetFilters}>
+                      <i className="fas fa-sync-alt"></i> Reset Filters
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="product-listing">
+                  <div className="section-header">
+                    <h2>Our Products</h2>
+                    <div className="sort-options">
+                      <span>Sort by:</span>
+                      <select>
+                        <option>Featured</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Newest Arrivals</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {loading ? (
+                    <div className="loading-container">
+                      <div className="loading-spinner"></div>
+                      <p>Loading products...</p>
+                    </div>
+                  ) : filteredProducts.length === 0 ? (
+                    <div className="no-results">
+                      <i className="fas fa-search"></i>
+                      <p>No products found matching your criteria.</p>
+                      <button onClick={resetFilters}>Reset Filters</button>
+                    </div>
                   ) : (
-                    <span className="out-of-stock">Out of Stock</span>
+                    <div className="products-grid">
+                      {filteredProducts.map(product => (
+                        <div key={product.id} className="product-card" onClick={() => setSelectedProduct(product)}>
+                          <div className="product-image">
+                            <img src={product.image} alt={product.name} />
+                            <div className="product-badge">New</div>
+                            <button className="quick-view" onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProduct(product);
+                            }}>
+                              <i className="fas fa-eye"></i> Quick View
+                            </button>
+                          </div>
+                          <div className="product-info">
+                            <h3>{product.name}</h3>
+                            <p className="price">FRW {formatPrice(product.price)}</p>
+                            <p className="category">{product.category}</p>
+                            <div className="rating">
+                              <i className="fas fa-star"></i>
+                              <i className="fas fa-star"></i>
+                              <i className="fas fa-star"></i>
+                              <i className="fas fa-star"></i>
+                              <i className="far fa-star"></i>
+                            </div>
+                            <button className="add-to-cart-btn" onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart(product);
+                            }}>
+                              <i className="fas fa-cart-plus"></i> Add to Cart
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                </p>
-                <p className="description">{selectedProduct.description}</p>
-                <div className="actions">
-                  <button className="add-to-cart" disabled={!selectedProduct.inStock}>
-                    Add to Cart
-                  </button>
-                  <button className="wishlist">
-                    <i className="far fa-heart"></i> Wishlist
-                  </button>
                 </div>
-                <div className="specs">
-                  <h4>Specifications</h4>
-                  <ul>
-                    <li><strong>Brand:</strong> {selectedProduct.brand}</li>
-                    <li><strong>Category:</strong> {selectedProduct.category}</li>
-                    {/* Additional specs could be added here */}
-                  </ul>
+              </>
+            )}
+          </>
+        )}
+
+        {activeTab === 'about' && (
+          <div className="about-section">
+            <div className="about-header">
+              <h1>About 23 ONLINE SHOP</h1>
+              <p>Your trusted electronics retailer in Rwanda</p>
+            </div>
+            <div className="about-content">
+              <div className="about-image">
+                <img src="https://via.placeholder.com/800x500?text=Our+Store" alt="Our Store" />
+              </div>
+              <div className="about-text">
+                <h2>Our Story</h2>
+                <p>Welcome to 23 ONLINE SHOP, your premier destination for cutting-edge technology and electronic devices in Rwanda. Founded in 2025, we've grown from a small local shop to the leading e-commerce platform for electronics in the Eastern Province.</p>
+                <p>Our mission is to provide high-quality products with exceptional customer service at competitive prices. We carefully select all our products to ensure they meet the highest standards of quality and performance.</p>
+                
+                <div className="about-features">
+                  <div className="feature">
+                    <i className="fas fa-check-circle"></i>
+                    <h3>Authentic Products</h3>
+                    <p>All our products are 100% genuine with manufacturer warranties</p>
+                  </div>
+                  <div className="feature">
+                    <i className="fas fa-truck"></i>
+                    <h3>Fast Delivery</h3>
+                    <p>Same-day delivery available in Gisenyi and surrounding areas</p>
+                  </div>
+                  <div className="feature">
+                    <i className="fas fa-headset"></i>
+                    <h3>24/7 Support</h3>
+                    <p>Our customer service team is always ready to assist you</p>
+                  </div>
                 </div>
+                
+                <h3>Our Location</h3>
+                <p><i className="fas fa-map-marker-alt"></i> Gisenyi, near public beach, Rwanda</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Product Listing */}
-        {!selectedProduct && (
-          <div className="product-listing">
-            {isLoading ? (
-              <div className="loading-spinner">
-                <div className="spinner"></div>
-                <p>Loading products...</p>
-              </div>
-            ) : products.length > 0 ? (
-              <>
-                <div className="results-count">
-                  Showing {products.length} of {allProducts.length} products
+        {activeTab === 'contact' && (
+          <div className="contact-section">
+            <div className="contact-header">
+              <h1>Contact Us</h1>
+              <p>We'd love to hear from you</p>
+            </div>
+            <div className="contact-container">
+              <div className="contact-info">
+                <h2><i className="fas fa-envelope"></i> Get in Touch</h2>
+                <div className="info-item">
+                  <i className="fas fa-map-marker-alt"></i>
+                  <div>
+                    <h3>Address</h3>
+                    <p>Gisenyi, near public beach, Rwanda</p>
+                  </div>
                 </div>
-                <div className="products-grid">
-                  {products.map(product => (
-                    <div
-                      key={product.id}
-                      className={`product-card ${!product.inStock ? 'out-of-stock' : ''}`}
-                      onClick={() => handleProductClick(product)}
-                    >
-                      <div className="product-image">
-                        <img src={product.image} alt={product.name} />
-                        {!product.inStock && (
-                          <div className="stock-label">Out of Stock</div>
-                        )}
-                      </div>
-                      <div className="product-info">
-                        <h3>{product.name}</h3>
-                        <div className="price-rating">
-                          <span className="price">${product.price.toFixed(2)}</span>
-                          <span className="rating">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <i
-                                key={i}
-                                className={`fas fa-star ${i < Math.floor(product.rating) ? 'filled' : ''} ${i === Math.floor(product.rating) && product.rating % 1 >= 0.5 ? 'half-filled' : ''}`}
-                              ></i>
-                            ))}
-                          </span>
-                        </div>
-                        <p className="brand">{product.brand}</p>
-                        <button className="quick-view">Quick View</button>
-                      </div>
-                    </div>
-                  ))}
+                <div className="info-item">
+                  <i className="fas fa-phone-alt"></i>
+                  <div>
+                    <h3>Phone</h3>
+                    <p>+250 790011137</p>
+                  </div>
                 </div>
-              </>
-            ) : (
-              <div className="no-results">
-                <i className="fas fa-search"></i>
-                <h3>No products found</h3>
-                <p>Try adjusting your search or filter criteria</p>
+                <div className="info-item">
+                  <i className="fas fa-envelope"></i>
+                  <div>
+                    <h3>Email</h3>
+                    <p>onlineshop@gmail.com</p>
+                  </div>
+                </div>
+                <div className="info-item">
+                  <i className="fas fa-clock"></i>
+                  <div>
+                    <h3>Hours</h3>
+                    <p>Monday - Friday: 8:00 AM - 6:00 PM</p>
+                    <p>Saturday: 9:00 AM - 4:00 PM</p>
+                  </div>
+                </div>
+                
+                <h2 className="social-title">Follow Us</h2>
+                <div className="social-media">
+                  <a href="https://www.facebook.com/julesdrigo/" target="_blank" rel="noopener noreferrer">
+                    <i className="fab fa-facebook-f"></i>
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <i className="fab fa-twitter"></i>
+                  </a>
+                  <a href="https://www.instagram.com/muhetooo/" target="_blank" rel="noopener noreferrer">
+                    <i className="fab fa-instagram"></i>
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <i className="fab fa-linkedin-in"></i>
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    <i className="fab fa-whatsapp"></i>
+                  </a>
+                </div>
               </div>
-            )}
+              
+              <div className="contact-form">
+                <h2><i className="fas fa-paper-plane"></i> Send Us a Message</h2>
+                <form>
+                  <div className="form-group">
+                    <input type="text" placeholder="Your Name" required />
+                  </div>
+                  <div className="form-group">
+                    <input type="email" placeholder="Your Email" required />
+                  </div>
+                  <div className="form-group">
+                    <input type="text" placeholder="Subject" required />
+                  </div>
+                  <div className="form-group">
+                    <textarea placeholder="Your Message" rows="5" required></textarea>
+                  </div>
+                  <button type="submit" className="submit-btn">
+                    <i className="fas fa-paper-plane"></i> Send Message
+                  </button>
+                </form>
+              </div>
+            </div>
+            
+            <div className="map-container">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3987.634073509567!2d29.25410981475398!3d-1.6928369987293867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwNDEnMzQuMiJTIDI5wrAxNScyMS4xIkU!5e0!3m2!1sen!2srw!4v1620000000000!5m2!1sen!2srw" 
+                width="100%" 
+                height="450" 
+                style={{border:0}} 
+                allowFullScreen="" 
+                loading="lazy"
+                title="Our Location"
+              ></iframe>
+            </div>
           </div>
         )}
       </main>
@@ -389,593 +539,74 @@ const App = () => {
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h4>Customer Service</h4>
-            <ul>
-              <li>Contact Us</li>
-              <li>FAQs</li>
-              <li>Returns & Refunds</li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h4>About Us</h4>
-            <ul>
-              <li>Our Story</li>
-              <li>Careers</li>
-              <li>Privacy Policy</li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h4>Connect With Us</h4>
-            <div className="social-icons">
-              <i className="fab fa-facebook"></i>
-              <i className="fab fa-twitter"></i>
-              <i className="fab fa-instagram"></i>
+            <h3>23 ONLINE SHOP</h3>
+            <p>Your trusted electronics retailer in Rwanda, offering the latest gadgets at competitive prices with exceptional customer service.</p>
+            <div className="footer-social">
+              <a href="https://www.facebook.com/julesdrigo/" target="_blank" rel="noopener noreferrer"><i className="fab fa-facebook-f"></i></a>
+              <a href="#" target="_blank" rel="noopener noreferrer"><i className="fab fa-twitter"></i></a>
+              <a href="https://www.instagram.com/muhetooo/" target="_blank" rel="noopener noreferrer"><i className="fab fa-instagram"></i></a>
+              <a href="#" target="_blank" rel="noopener noreferrer"><i className="fab fa-linkedin-in"></i></a>
             </div>
           </div>
+          
+          <div className="footer-section">
+            <h3>Quick Links</h3>
+            <ul>
+              <li><a href="#" onClick={() => setActiveTab('home')}>Home</a></li>
+              <li><a href="#" onClick={() => setActiveTab('about')}>About Us</a></li>
+              <li><a href="#" onClick={() => setActiveTab('contact')}>Contact Us</a></li>
+              <li><a href="#" onClick={() => setIsRegistering(true)}>Register</a></li>
+              <li><a href="#">Terms & Conditions</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+            </ul>
+          </div>
+          
+          <div className="footer-section">
+            <h3>Categories</h3>
+            <ul>
+              {categories.map(category => (
+                <li key={category}>
+                  <a href="#" onClick={() => { setActiveTab('home'); setCategoryFilter(category); }}>
+                    {category}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div className="footer-section">
+            <h3>Contact Info</h3>
+            <ul className="contact-list">
+              <li><i className="fas fa-map-marker-alt"></i> Gisenyi, near public beach, Rwanda</li>
+              <li><i className="fas fa-phone-alt"></i> +250 790011137</li>
+              <li><i className="fas fa-envelope"></i> onlineshop@gmail.com</li>
+              <li><i className="fas fa-clock"></i> Mon-Fri: 8AM - 6PM</li>
+            </ul>
+          </div>
+          
+          <div className="footer-section">
+            <h3>Newsletter</h3>
+            <p>Subscribe to our newsletter for the latest products and offers</p>
+            <form className="newsletter-form">
+              <input type="email" placeholder="Your Email Address" required />
+              <button type="submit">
+                <i className="fas fa-paper-plane"></i> Subscribe
+              </button>
+            </form>
+          </div>
         </div>
-        <div className="copyright">
-          &copy; {new Date().getFullYear()} ABC Electronics. All rights reserved.
+        
+        <div className="footer-bottom">
+          <div className="payment-methods">
+            <i className="fab fa-cc-visa"></i>
+            <i className="fab fa-cc-mastercard"></i>
+            <i className="fab fa-cc-paypal"></i>
+            <i className="fab fa-cc-mtn"></i>
+            <i className="fab fa-cc-airtel"></i>
+          </div>
+          <p>&copy; {new Date().getFullYear()} 23 ONLINE SHOP. All Rights Reserved.</p>
         </div>
       </footer>
-
-      {/* CSS Styles */}
-      <style jsx>{`
-        /* Base Styles */
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .app {
-          display: flex;
-          flex-direction: column;
-          min-height: 100vh;
-          background-color: #f5f5f5;
-          color: #333;
-        }
-
-        /* Header Styles */
-        .header {
-          background: linear-gradient(135deg, #2c3e50, #4ca1af);
-          color: white;
-          padding: 2rem;
-          text-align: center;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-          font-size: 2.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .header p {
-          font-size: 1.1rem;
-          opacity: 0.9;
-        }
-
-        /* Main Content Styles */
-        .main-content {
-          flex: 1;
-          padding: 2rem;
-          max-width: 1400px;
-          margin: 0 auto;
-          width: 100%;
-        }
-
-        /* Filters Section */
-        .filters-section {
-          background-color: white;
-          padding: 1.5rem;
-          border-radius: 8px;
-          box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-          margin-bottom: 2rem;
-        }
-
-        .search-container {
-          display: flex;
-          margin-bottom: 1.5rem;
-        }
-
-        .search-input {
-          flex: 1;
-          padding: 0.8rem 1rem;
-          border: 1px solid #ddd;
-          border-radius: 4px 0 0 4px;
-          font-size: 1rem;
-          outline: none;
-          transition: border-color 0.3s;
-        }
-
-        .search-input:focus {
-          border-color: #4ca1af;
-        }
-
-        .search-button {
-          background-color: #2c3e50;
-          color: white;
-          border: none;
-          padding: 0 1.2rem;
-          border-radius: 0 4px 4px 0;
-          cursor: pointer;
-          transition: background-color 0.3s;
-        }
-
-        .search-button:hover {
-          background-color: #1a252f;
-        }
-
-        .filter-controls {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 1.5rem;
-        }
-
-        .filter-group {
-          flex: 1;
-          min-width: 150px;
-        }
-
-        .filter-group label {
-          display: block;
-          margin-bottom: 0.5rem;
-          font-weight: 600;
-          color: #555;
-        }
-
-        .filter-group select,
-        .filter-group input[type="range"] {
-          width: 100%;
-          padding: 0.5rem;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          background-color: white;
-        }
-
-        .checkbox-group {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding-top: 1.5rem;
-        }
-
-        .checkbox-group input {
-          width: auto;
-        }
-
-        /* Product Details */
-        .product-details {
-          background-color: white;
-          border-radius: 8px;
-          box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-          padding: 2rem;
-          margin-bottom: 2rem;
-          position: relative;
-        }
-
-        .close-button {
-          position: absolute;
-          top: 1rem;
-          right: 1rem;
-          background: none;
-          border: none;
-          font-size: 1.5rem;
-          cursor: pointer;
-          color: #777;
-          transition: color 0.3s;
-        }
-
-        .close-button:hover {
-          color: #333;
-        }
-
-        .details-content {
-          display: flex;
-          gap: 2rem;
-        }
-
-        .details-image {
-          flex: 1;
-          max-width: 400px;
-        }
-
-        .details-image img {
-          width: 100%;
-          border-radius: 8px;
-          object-fit: cover;
-        }
-
-        .details-info {
-          flex: 2;
-        }
-
-        .details-info h2 {
-          font-size: 1.8rem;
-          margin-bottom: 1rem;
-          color: #2c3e50;
-        }
-
-        .price-rating {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-          margin-bottom: 1rem;
-        }
-
-        .price {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: #2c3e50;
-        }
-
-        .rating {
-          display: flex;
-          align-items: center;
-          gap: 0.3rem;
-        }
-
-        .rating .fa-star {
-          color: #ddd;
-        }
-
-        .rating .filled {
-          color: #ffc107;
-        }
-
-        .rating .half-filled {
-          position: relative;
-          color: #ddd;
-        }
-
-        .rating .half-filled::before {
-          content: '\f089';
-          position: absolute;
-          left: 0;
-          color: #ffc107;
-        }
-
-        .availability {
-          margin-bottom: 1.5rem;
-        }
-
-        .in-stock {
-          color: #28a745;
-          font-weight: 600;
-        }
-
-        .out-of-stock {
-          color: #dc3545;
-          font-weight: 600;
-        }
-
-        .description {
-          margin-bottom: 1.5rem;
-          line-height: 1.6;
-          color: #555;
-        }
-
-        .actions {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 2rem;
-        }
-
-        .add-to-cart,
-        .wishlist {
-          padding: 0.8rem 1.5rem;
-          border: none;
-          border-radius: 4px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .add-to-cart {
-          background-color: #2c3e50;
-          color: white;
-        }
-
-        .add-to-cart:hover {
-          background-color:rgb(113, 59, 124);
-        }
-
-        .add-to-cart:disabled {
-          background-color: #ccc;
-          cursor: not-allowed;
-        }
-
-        .wishlist {
-          background-color: white;
-          border: 1px solid #ddd;
-          color: #555;
-        }
-
-        .wishlist:hover {
-          background-color: #f8f9fa;
-          border-color: #ccc;
-        }
-
-        .specs h4 {
-          margin-bottom: 1rem;
-          color: #2c3e50;
-        }
-
-        .specs ul {
-          list-style: none;
-        }
-
-        .specs li {
-          margin-bottom: 0.5rem;
-          padding-bottom: 0.5rem;
-          border-bottom: 1px solid #eee;
-        }
-
-        .specs li:last-child {
-          border-bottom: none;
-        }
-
-        /* Product Listing */
-        .product-listing {
-          background-color: white;
-          border-radius: 8px;
-          box-shadow: 0 2px 15px rgba(141, 66, 66, 0.05);
-          padding: 2rem;
-        }
-
-        .results-count {
-          margin-bottom: 1.5rem;
-          color: #777;
-          font-size: 0.9rem;
-        }
-
-        .products-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-          gap: 1.5rem;
-        }
-
-        .product-card {
-          border: 1px solid #eee;
-          border-radius: 8px;
-          overflow: hidden;
-          transition: all 0.3s;
-          cursor: pointer;
-          position: relative;
-        }
-
-        .product-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 5px 15px rgba(85, 57, 57, 0.1);
-        }
-
-        .product-card.out-of-stock {
-          opacity: 0.7;
-        }
-
-        .product-image {
-          position: relative;
-          height: 200px;
-          overflow: hidden;
-        }
-
-        .product-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.3s;
-        }
-
-        .product-card:hover .product-image img {
-          transform: scale(1.05);
-        }
-
-        .stock-label {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          background-color:rgb(56, 22, 59);
-          color: white;
-          padding: 0.3rem 0.6rem;
-          border-radius: 4px;
-          font-size: 0.8rem;
-          font-weight: bold;
-        }
-
-        .product-info {
-          padding: 1rem;
-        }
-
-        .product-info h3 {
-          font-size: 1.1rem;
-          margin-bottom: 0.5rem;
-          color: #2c3e50;
-        }
-
-        .product-info .price-rating {
-          margin-bottom: 0.5rem;
-        }
-
-        .product-info .price {
-          font-size: 1.2rem;
-          color: #2c3e50;
-        }
-
-        .product-info .brand {
-          color: #777;
-          font-size: 0.9rem;
-          margin-bottom: 1rem;
-        }
-
-        .quick-view {
-          width: 100%;
-          padding: 0.5rem;
-          background-color:rgb(65, 31, 71);
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          color: #555;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .quick-view:hover {
-          background-color:rgb(89, 53, 104);
-          border-color: #ccc;
-        }
-
-        /* Loading Spinner */
-        .loading-spinner {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 3rem;
-        }
-
-        .spinner {
-          width: 50px;
-          height: 50px;
-          border: 5px solidrgb(104, 66, 66);
-          border-top: 5px solid #2c3e50;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin-bottom: 1rem;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        /* No Results */
-        .no-results {
-          text-align: center;
-          padding: 3rem;
-          color: #777;
-        }
-
-        .no-results .fa-search {
-          font-size: 3rem;
-          margin-bottom: 1rem;
-          color: #ddd;
-        }
-
-        .no-results h3 {
-          margin-bottom: 0.5rem;
-          color: #555;
-        }
-
-        /* Footer */
-        .footer {
-          background-color:rgb(74, 48, 82);
-          color: white;
-          padding: 3rem 2rem 1.5rem;
-          margin-top: 2rem;
-        }
-
-        .footer-content {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 3rem;
-          max-width: 1200px;
-          margin: 0 auto;
-          padding-bottom: 2rem;
-        }
-
-        .footer-section {
-          flex: 1;
-          min-width: 200px;
-        }
-
-        .footer-section h4 {
-          margin-bottom: 1.5rem;
-          font-size: 1.2rem;
-        }
-
-        .footer-section ul {
-          list-style: none;
-        }
-
-        .footer-section li {
-          margin-bottom: 0.8rem;
-          cursor: pointer;
-          transition: color 0.5s;
-        }
-
-        .footer-section li:hover {
-          color:rgb(156, 77, 175);
-        }
-
-        .social-icons {
-          display: flex;
-          gap: 1rem;
-          font-size: 1.5rem;
-        }
-
-        .social-icons i {
-          cursor: pointer;
-          transition: color 0.3s;
-        }
-
-        .social-icons i:hover {
-          color:rgb(162, 61, 172);
-        }
-
-        .copyright {
-          text-align: center;
-          padding-top: 1.5rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-          margin-top: 1.5rem;
-          font-size: 0.9rem;
-          color: rgba(255, 255, 255, 0.99);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .details-content {
-            flex-direction: column;
-          }
-
-          .details-image {
-            max-width: 100%;
-          }
-
-          .filter-controls {
-            flex-direction: column;
-            gap: 1rem;
-          }
-
-          .checkbox-group {
-            padding-top: 0;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .header h1 {
-            font-size: 2rem;
-          }
-
-          .main-content {
-            padding: 1rem;
-          }
-
-          .actions {
-            flex-direction: column;
-          }
-
-          .add-to-cart,
-          .wishlist {
-            width: 100%;
-          }
-        }
-      `}</style>
-
-      {/* Font Awesome for icons */}
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-      />
     </div>
   );
 };
